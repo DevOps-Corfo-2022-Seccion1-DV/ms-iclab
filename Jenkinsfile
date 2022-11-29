@@ -188,14 +188,10 @@ pipeline {
             when { anyOf { branch 'feature-*' } }
             steps{
                 script {
-                    echo env.BRANCH_NAME
-                    echo BRANCH_NAME
-                    prueba1 = '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"feature-prueba","base":"main"}'
                     //cambiar feature-prueba por valor variable 
                     prueba2 = '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"'+env.BRANCH_NAME+'","base":"main"}'
-                    // prueba2 = prueba2.toString()
-                    prueba2 = prueba2.replaceAll('"', '\\"')
-                    echo prueba1
+                    prueba2 = prueba2.toString()
+                    // prueba2 = prueba2.replaceAll('"', '\\"')
                     echo prueba2
                     sh(''' 
                     curl \
