@@ -49,18 +49,11 @@ pipeline {
 
                         echo "Commit Mensaje Valido"
                     }else{
+                        slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
                         echo "no contiene ninguna palabra"
                         currentBuild.result = 'ABORTED'
                         error("No se ha encontrado ninguna palabra clave para el incremento de version")
                     }
-                }
-            }
-            post{
-                success{
-                    echo "Mensaje commit correcto"
-                }
-                failure{
-                    slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
                 }
             }
         }
