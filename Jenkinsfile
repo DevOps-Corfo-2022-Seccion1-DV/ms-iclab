@@ -190,13 +190,11 @@ pipeline {
                 script {
                     //cambiar feature-prueba por valor variable 
                     prueba2 = '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"'+env.BRANCH_NAME+'","base":"main"}'
-                    prueba2 = prueba2.toString()
+                    // prueba2 = prueba2.toString()
                     //parsing JSON
-                    def jsonSlurper = new JsonSlurper()
-                    def json = jsonSlurper.parseText(prueba2)
-                    echo "json: "+json
-                    // prueba2 = prueba2.replaceAll('"', '\\"')
-                    echo prueba2
+                    echo "prueba2: "+prueba2
+                    prueba2 = readJSON(text: prueba2)
+                    echo "prueba2 json: "+prueba2
                     sh(''' 
                     curl \
                         -X POST \
