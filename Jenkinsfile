@@ -182,7 +182,8 @@ pipeline {
         stage('Download Artifact From Nexus'){
             when { branch 'main' }
             steps{
-                sh "curl -X GET -u admin:1qazxsw2 https://nexus.danilovidalm.com/repository/devops-usach-nexus/com/devopsusach2020/DevOpsUsach2020/$lasttag/DevOpsUsach2020-$lasttag.jar -O"
+                // nexusArtifactDownloader nexusInstanceId: 'nexus01', nexusRepositoryId: 'devops-usach-nexus', nexusArtifact: [[artifactId: 'DevOpsUsach2020', groupId: 'com.devopsusach2020', packaging: 'jar', version: lasttag]]
+                sh "curl -X GET -u admin:1qazxsw2 https://nexus.danilovidalm.com/repository/devops-usach-nexus/com/devopsusach2020/DevOpsUsach2020/"+lasttag+"/DevOpsUsach2020-"+lasttag+".jar -O"
             }
             post{
                 failure {
@@ -193,7 +194,7 @@ pipeline {
         stage('Run Artifact Jar'){
             when { branch 'main' }
             steps{
-                sh "nohup java -jar ./DevOpsUsach2020-$lasttag.jar&"
+                sh "nohup java -jar ./DevOpsUsach2020-"+lasttag+".jar&"
             }
             post {
                 failure {
