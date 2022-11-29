@@ -193,6 +193,7 @@ pipeline {
                     prueba1 = '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"feature-prueba","base":"main"}'
                     //cambiar feature-prueba por valor variable 
                     prueba2 = '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"'+env.BRANCH_NAME+'","base":"main"}'
+
                     echo prueba1
                     echo prueba2
                     sh(''' 
@@ -201,7 +202,7 @@ pipeline {
                         -H "Accept: application/vnd.github+json" \
                         -H "Authorization: Bearer $GIT_AUTH_PSW" \
                         https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls \
-                        -d '''+prueba2+'''
+                        -d $prueba2
                     ''')
                     // statusCode = sh(script: 'curl -o /dev/null -s -w "%{http_code}" -X POST -H "Accept: apllication/vnd.github+json" -H "Autorization: Bearer $GIT_AUTH_PSW" https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls -d {"title":"Titulo pull request","body":"Cuerpo pull request","head":"$BRANCH_NAME","base":"main"}', returnStdout: true)
                     // echo statusCode
