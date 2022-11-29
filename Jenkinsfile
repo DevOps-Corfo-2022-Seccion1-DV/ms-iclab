@@ -182,7 +182,7 @@ pipeline {
         stage('Download Artifact From Nexus'){
             when { branch 'main' }
             steps{
-                sh 'curl -X GET -u admin:1qazxsw2 https://nexus.danilovidalm.com/repository/devops-usach-nexus/com/devopsusach2020/DevOpsUsach2020/${lasttag}/DevOpsUsach2020-${lasttag}.jar -O'
+                sh "curl -X GET -u admin:1qazxsw2 https://nexus.danilovidalm.com/repository/devops-usach-nexus/com/devopsusach2020/DevOpsUsach2020/$lasttag/DevOpsUsach2020-$lasttag.jar -O"
             }
             post{
                 failure {
@@ -193,7 +193,7 @@ pipeline {
         stage('Run Artifact Jar'){
             when { branch 'main' }
             steps{
-                sh 'nohup java -jar ./DevOpsUsach2020-${lasttag}.jar&'
+                sh "nohup java -jar ./DevOpsUsach2020-$lasttag.jar&"
             }
             post {
                 failure {
@@ -212,8 +212,12 @@ pipeline {
         stage('CURL Localhost:8081'){
             when { branch 'main' }
             steps{
-                echo 'CURL...'
-                sh 'curl -s -o /dev/null/ -w %{http_code} http://localhost:8081/rest/mscovid/test?msg=testing > response.txt'
+                try{
+                    sh 'curl -s -o /dev/null/ -w %{http_code} http://localhost:8081/rest/mscovid/test?msg=testing > response.txt'
+                }catch(Exception e){
+                    echo "Error al hacer curl"
+                    slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
+                }
                 script{
                     responseStatus = sh(script: 'cat response.txt | grep HTTP/1.1 | cut -d " " -f2', returnStdout: true).trim()
                     echo "responseStatus: "+responseStatus
