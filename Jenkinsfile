@@ -140,7 +140,7 @@ pipeline {
                                 git push --tags
                             ''')
                             slackSend color: "good", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Success"
-                        }catch{
+                        }catch(Exception e){
                             echo "Error al hacer push de tag"
                             slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
                         }
