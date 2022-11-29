@@ -193,8 +193,10 @@ pipeline {
                     //eliminar salto de linea de variable
                     env.result = env.result.replace("\n", "")
 
-                    jsonObj=jsonObj.replace("{title}", env.result)
-                    jsonObj=jsonObj.replace("{body}", env.result)
+                    // jsonObj=jsonObj.replace("{title}", env.result)
+                    jsonObj=jsonObj.replace("{title}", "Titulo prueba")
+                    // jsonObj=jsonObj.replace("{body}", env.result)
+                    jsonObj=jsonObj.replace("{body}", "Body prueba")
                     jsonObj=jsonObj.replace("{branchname}", env.BRANCH_NAME)
                     jsonObj=jsonObj.replace("{main}", "main")
                                                                     
