@@ -196,7 +196,7 @@ pipeline {
                     jsonObj=jsonObj.replace("{main}", "main")
                                                                     
                     echo "JSON: $jsonObj"
-                    statusCode=sh(script: "curl -o /dev/null -s -w \"%{http_code}\" -X POST -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GIT_AUTH_PSW\" https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls --data-raw '$myjson'", returnStdout: true)                         
+                    statusCode=sh(script: "curl -o /dev/null -s -w \"%{http_code}\" -X POST -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GIT_AUTH_PSW\" https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls --data-raw '$jsonObj'", returnStdout: true)                         
                     echo "Resultado Pull request :  $statusCode" 
                     // //parsing JSON
                     // prueba2 = readJSON(text: prueba2)
