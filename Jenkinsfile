@@ -1,6 +1,4 @@
 def pipelineType
-def git_repo = 'github.com:DevOps-Corfo-2022-Seccion1-DV/ms-iclab.git'
-// def git_repo = 'github.com/DevOps-Corfo-2022-Seccion1-DV/ms-iclab'
 
 pipeline {
     agent any
@@ -30,9 +28,9 @@ pipeline {
             }
             // checkout scm
         }
-        stage("Env Variables") {
+        stage("CD o CI") {
             steps {
-                sh "printenv"
+                // sh "printenv"
                 script {
                     if(env.BRANCH_NAME == 'main'){
                         pipelineType = "Pipeline CD"
@@ -45,13 +43,9 @@ pipeline {
         // stage("Build"){
         //     when { anyOf { branch 'feature-*'; branch 'main' } }
         //     steps {
-        //         // sh './mvnw clean compile -e'
-        //         slackSend color: "good", message: "Building.. branch: "+env.BRANCH_NAME
+        //         sh './mvnw clean compile -e'
         //     }
         //     post{
-        //         success{
-        //             slackSend color: "good", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Success"
-        //         }
         //         failure {
         //             slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
         //         }
@@ -60,13 +54,9 @@ pipeline {
         // stage('Test') {
         //     when { anyOf { branch 'feature-*'; branch 'main' } }
         //     steps {
-        //         // sh './mvnw test -e'
-        //         slackSend color: "good", message: "Testing.. branch: "+env.BRANCH_NAME
+        //         sh './mvnw test -e'
         //     }
         //     post{
-        //         success{
-        //             slackSend color: "good", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Success"
-        //         }
         //         failure {
         //             slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
         //         }
@@ -76,22 +66,36 @@ pipeline {
         //     when { anyOf { branch 'feature-*'; branch 'main' } }
         //     steps {
         //         // sh './mvnw sonar:sonar -e'
-        //         slackSend color: "good", message: "SonarQube.. branch: "+env.BRANCH_NAME
-        //         withSonarQubeEnv('sonar-public') { // If you have configured more than one global server connection, you can specify its name
+        //         withSonarQubeEnv('sonar-public') {
         //             sh './mvnw clean package sonar:sonar'
         //         }
         //     }
         //     post{
-        //         success{
-        //             slackSend color: "good", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Success"
-        //         }
         //         failure {
         //             slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
         //         }
         //     }
         // }
-        // // generar pull request desde rama feature a main
-
+        // stage('pull request rama feature-*'){
+        //     when { branch 'feature-*' }
+        //     steps{
+        //         script {
+        //             jsonObj='{"title":"{title}","body":"{body}","head":"{branchname}","base":"{main}"}'
+        //             jsonObj=jsonObj.replace("{title}", "PR Generado por Jenkins")
+        //             jsonObj=jsonObj.replace("{body}", "Body prueba")
+        //             jsonObj=jsonObj.replace("{branchname}", env.BRANCH_NAME)
+        //             jsonObj=jsonObj.replace("{main}", "main")                                      
+        //             echo "JSON: $jsonObj"
+        //             statusCode=sh(script: "curl -o /dev/null -s -w \"%{http_code}\" -X POST -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GIT_AUTH_PSW\" https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls --data-raw '$jsonObj'", returnStdout: true)                         
+        //             echo "Resultado Pull request :  $statusCode" 
+        //             if(statusCode == "201"){
+        //                 slackSend color: "good", message: "Pull request creado correctamente"
+        //             }else{
+        //                 slackSend color: "danger", message: "Error al crear pull request"
+        //             }
+        //         }
+        //     }
+        // }
         // stage('Package'){
         //     when { anyOf {  branch 'main' } }
         //     steps {
@@ -183,62 +187,6 @@ pipeline {
 
         // }
 
-        stage('pull request rama feature-*'){
 
-            when { anyOf { branch 'feature-*' } }
-            steps{
-                script {
-                    //cambiar feature-prueba por valor variable 
-                    jsonObj='{"title":"{title}","body":"{body}","head":"{branchname}","base":"{main}"}'
-                    //eliminar salto de linea de variable
-                    env.result = env.result.replace("\n", "")
-
-                    // jsonObj=jsonObj.replace("{title}", env.result)
-                    jsonObj=jsonObj.replace("{title}", "Titulo prueba")
-                    // jsonObj=jsonObj.replace("{body}", env.result)
-                    jsonObj=jsonObj.replace("{body}", "Body prueba")
-                    jsonObj=jsonObj.replace("{branchname}", env.BRANCH_NAME)
-                    jsonObj=jsonObj.replace("{main}", "main")
-                                                                    
-                    echo "JSON: $jsonObj"
-                    statusCode=sh(script: "curl -o /dev/null -s -w \"%{http_code}\" -X POST -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GIT_AUTH_PSW\" https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls --data-raw '$jsonObj'", returnStdout: true)                         
-                    echo "Resultado Pull request :  $statusCode" 
-                    // //parsing JSON
-                    // prueba2 = readJSON(text: prueba2)
-                    // echo "prueba2 json: "+prueba2
-                    // sh(''' 
-                    // curl \
-                    //     -X POST \
-                    //     -H "Accept: application/vnd.github+json" \
-                    //     -H "Authorization: Bearer $GIT_AUTH_PSW" \
-                    //     https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls \
-                    //     -d '''+prueba2+'''
-                    // ''')
-                    // statusCode = sh(script: 'curl -o /dev/null -s -w "%{http_code}" -X POST -H "Accept: apllication/vnd.github+json" -H "Autorization: Bearer $GIT_AUTH_PSW" https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls -d {"title":"Titulo pull request","body":"Cuerpo pull request","head":"$BRANCH_NAME","base":"main"}', returnStdout: true)
-                    // echo statusCode
-                }
-                               // script {
-                    
-                //     // echo "status code: "+statusCode
-                //     // if(statusCode == 201){
-                //     //     slackSend color: "good", message: "pull request creado"
-                //     // }else{
-                //     //     slackSend color: "danger", message: "pull request no creado"
-                //     // }
-                
-                //     // // sh "curl -X POST -u danilovidalm:ghp_5b5eS7kz5jYX9m9d3q3Z1hjZJgH8z7V1fB6y https://api.github.com/repos/danilovidalm/Grupo3/repos/branches/feature-1/pulls -d '{\"title\": \"pull request desde rama feature-1 a main\", \"head\": \"feature-1\", \"base\": \"main\"}'"
-                //     // //https://github.com/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/compare/main...DevOps-Corfo-2022-Seccion1-DV:ms-iclab:feature-prueba?expand=1
-                //     // sh "curl -o - -s -w \"\n%{http_code}\n\" -X PUT -d '{\"commit_title\": \"Merge pull request\"}'  https://github.ibm.com/api/v3/repos/****/****/pulls/$CHANGE_ID/merge?access_token=$JENKINSBOT_PSW | tail -1 > mergeResult.txt"
-
-                //     // def mergeResult = readFile('mergeResult.txt').trim()
-                //     // if (mergeResult != "200") {
-                //     //     error "Unable to merge!"
-                //     // } else {
-                //     //     // Send a Slack message, etc
-                //     // }
-                
-                // }
-            }
-        }
     }
 }
