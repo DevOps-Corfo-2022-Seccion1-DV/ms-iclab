@@ -205,9 +205,9 @@ pipeline {
             steps{
                 echo 'CURL...'
                 sh 'curl -s -o /dev/null/ -w %{http_code} http://localhost:8081/rest/mscovid/test?msg=testing > response.txt'
-                responseStatus = sh(script: 'cat response.txt | grep HTTP/1.1 | cut -d " " -f2', returnStdout: true).trim()
-                echo "responseStatus: "+responseStatus
                 script{
+                    responseStatus = sh(script: 'cat response.txt | grep HTTP/1.1 | cut -d " " -f2', returnStdout: true).trim()
+                    echo "responseStatus: "+responseStatus
                     if(responseStatus == "200"){
                         echo "Success"
                         slackSend color: "good", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Success"
