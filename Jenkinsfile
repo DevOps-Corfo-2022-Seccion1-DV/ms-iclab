@@ -190,7 +190,7 @@ pipeline {
                 script {
                     echo env.BRANCH_NAME
                     echo BRANCH_NAME
-                    pruenaObjeto = '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":${BRANCH_NAME} ,"base":"main"}'
+                    pruenaObjeto = '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":\$BRANCH_NAME ,"base":"main"}'
                     echo pruenaObjeto
                     // sh(''' 
                     // curl \
