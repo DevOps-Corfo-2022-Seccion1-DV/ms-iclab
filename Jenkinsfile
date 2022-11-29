@@ -25,11 +25,9 @@ pipeline {
                 cleanWs()
                 checkout scm
             }
-            // checkout scm
         }
         stage("CD o CI") {
             steps {
-                // sh "printenv"
                 script {
                     if(env.BRANCH_NAME == 'main'){
                         pipelineType = "Pipeline CD"
@@ -128,6 +126,7 @@ pipeline {
                         }else{
                             echo "no contiene ninguna palabra"
                             currentBuild.result = 'ABORTED'
+                            slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
                             error("No se ha encontrado ninguna palabra clave para el incremento de version")
                         }
                         echo "lasttag: "+lasttag
@@ -140,104 +139,83 @@ pipeline {
                         ''')
                         slackSend color: "good", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Success"
                     }else{
-                        slackSend color: "danger", message: "Error al crear pull request"
+                        slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
                     }
                 }
             }
         }
-    //[Grupo2][Pipeline IC/CD][Rama: develop][Stage: build][Resultado: Éxito/Success].
-    //[Grupo2][Pipeline IC/CD][Rama: re-v1-0-0][Stage: test][Resultado: Error/Fail].
-        // stage('Package'){
-        //     when { anyOf {  branch 'main' } }
-        //     steps {
-        //         // sh './mvnw package -e'
-        //         slackSend color: "good", message: "Packaging.. branch: "+env.BRANCH_NAME
-        //     }
-        //     post{
-        //         success{
-        //             slackSend color: "good", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Success"
-        //         }
-        //         failure {
-        //             slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
-        //         }
-        //     }
-        // }
+        stage('Package'){
+            when { branch 'main' }
+            steps {
+                sh './mvnw package -e'
+            }
+            post{
+                failure {
+                    slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
+                }
+            }
+        }
+        stage('Upload Nexus'){
+            when { branch 'main' }
+            steps {
+                script{
+                    sh 'git fetch --tags'
+                    lasttag = sh(returnStdout: true, script: 'git describe --abbrev=0 --tags')
+                    lasttag = lasttag.trim()
+                    lasttag = lasttag.substring(1)
+                    echo "lasttag: "+lasttag
+                }
+                nexusPublisher nexusInstanceId: 'nexus01', nexusRepositoryId: 'devops-usach-nexus', packages: [[$class: 'MavenPackage', mavenAssetList: [[classifier: '', extension: '', filePath: './build/DevOpsUsach2020-0.0.1.jar']], mavenCoordinate: [artifactId: 'DevOpsUsach2020', groupId: 'com.devopsusach2020', packaging: 'jar', version: lasttag]]]
+            }
+            post{
+                failure {
+                    slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
+                }
+            }
+        }
+        stage('Download Artifact From Nexus'){
+            when { branch 'main' }
+            steps{
+                sh 'curl -X GET -u admin:1qazxsw2 https://nexus.danilovidalm.com/repository/devops-usach-nexus/com/devopsusach2020/DevOpsUsach2020/${lasttag}/DevOpsUsach2020-${lasttag}.jar -O'
+            }
+            post{
+                failure {
+                    slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
+                }
+            }
+        }
+        stage('Run Artifact Jar'){
+            steps{
+                sh 'nohup java -jar ./DevOpsUsach2020-${lasttag}.jar&'
+            }
+            post {
+                failure {
+                    slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
+                }
+            }
+        }
+        stage('sleep'){
+            steps{
+                echo 'Sleeping...'
+                sleep time: 20, unit: 'SECONDS'
+                sh 'ps -ef | grep java'
+            }
+        }
+        stage('CURL Localhost:8081'){
+            steps{
+                echo 'CURL...'
+                sh 'curl -s -o /dev/null/ -w %{http_code} http://localhost:8081/rest/mscovid/test?msg=testing > response.txt'
+                ${responseStatus} = sh(script 'cat response.txt')
 
-        //hacer push en rama feature
-
-        // stage('lasttagnexus'){
-        //     // environment {
-        //     //     GIT_AUTH = credentials('token-danilo')
-        //     // }
-        //     when { anyOf { branch 'feature-*' } }
-        //     steps {
-        //         script {
-        //             try {
-        //                 sh 'git fetch --tags'
-        //                 // lasttag = sh(returnStdout: true, script: 'git describe --tags `git rev-list --tags --max-count=1`')
-        //                 // echo "lasttag: ${lasttag}"
-        //                 lasttag = sh(returnStdout: true, script: 'git describe --abbrev=0 --tags')
-        //             }catch(Exception e){
-        //                 lasttag = "v0.0.0"
-        //             }
-        //             echo "lasttag: "+lasttag
-        //             echo "mensaje commit : "+env.commitmsg
-        //             lasttag = lasttag.trim()
-        //             echo "lasttag: "+lasttag
-        //             lasttag = lasttag.substring(1)
-        //             echo "lasttag: "+lasttag
-        //             lasttag = lasttag.split("\\.")
-        //             echo "lasttag: "+lasttag
-        //             //ver si mensaje contiene una palabra
-        //             if(env.commitmsg.contains("major")){
-        //                 lasttag = (lasttag[0].toInteger()+1)+".0.0"
-        //             }else if(env.commitmsg.contains("minor")){
-        //                 lasttag = lasttag[0]+"."+(lasttag[1].toInteger()+1)+"."+lasttag[2]
-        //             }else if(env.commitmsg.contains("patch")){
-        //                 lasttag = lasttag[0]+"."+lasttag[1]+"."+(lasttag[2].toInteger()+1)
-        //             }else{
-        //                 echo "no contiene ninguna palabra"
-        //                 currentBuild.result = 'ABORTED'
-        //                 error("No se ha encontrado ninguna palabra clave para el incremento de version")
-        //             }
-        //             echo "lasttag: "+lasttag
-        //             //crear nuevo tag en repo
-        //             sh "git tag -a v"+lasttag+" -m 'v"+lasttag+"'"
-        //             sh "git config --global user.email 'danilovidalm@gmail.com'"
-        //             sh "git config --global user.name 'Jenkins'"
-        //             sh ('''
-        //                 git config --local credential.helper "!f() { echo username=\\$GIT_AUTH_USR; echo password=\\$GIT_AUTH_PSW; }; f"
-        //                 git push --tags
-        //             ''')
-
-        //             //enviar tag a nexus
-        //             // nexusUpload(
-        //             //     groupId: 'com.grupo3',
-        //             //     artifactId: 'grupo3',
-        //             //     version: lasttag,
-        //             //     packaging: 'jar',
-        //             //     file: 'target/grupo3-0.0.1-SNAPSHOT.jar',
-        //             //     repositoryId: 'nexus-public',
-        //             //     url: 'http://nexus:8081/repository/maven-public/'
-        //             // )
-                
-        //             // sh "git push origin v"+lasttag
-        //             //actualizar version en pom.xml
-        //             // sh "mvn versions:set -DnewVersion="+lasttag+" -DgenerateBackupPoms=false"
-        //             // //subir cambios a repo
-        //             // sh "git add pom.xml"
-        //             // sh "git commit -m 'v"+lasttag+"'"
-        //             // sh "git push origin "+env.BRANCH_NAME
-        //             // //subir a nexus
-        //             // sh "mvn deploy -DskipTests"
-        //             // //slackSend color: "good", message: "lasttagnexus.. branch: "+env.BRANCH_NAME
-
-
-        //         }
-        //     }
-
-        // }
-
-
+            }
+            post {
+                success {
+                    slackSend color: "good", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Success"
+                }
+                failure {
+                    slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
+                }
+            }
+        }
     }
 }
