@@ -32,7 +32,7 @@ pipeline {
         }
         stage("Env Variables") {
             steps {
-                // sh "printenv"
+                sh "printenv"
                 script {
                     if(env.BRANCH_NAME == 'main'){
                         pipelineType = "Pipeline CD"
