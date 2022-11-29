@@ -212,13 +212,13 @@ pipeline {
         stage('CURL Localhost:8081'){
             when { branch 'main' }
             steps{
-                try{
-                    sh 'curl -s -o /dev/null/ -w %{http_code} http://localhost:8081/rest/mscovid/test?msg=testing > response.txt'
-                }catch(Exception e){
-                    echo "Error al hacer curl"
-                    slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
-                }
                 script{
+                    try{
+                        sh 'curl -s -o /dev/null/ -w %{http_code} http://localhost:8081/rest/mscovid/test?msg=testing > response.txt'
+                    }catch(Exception e){
+                        echo "Error al hacer curl"
+                        slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
+                    }
                     responseStatus = sh(script: 'cat response.txt | grep HTTP/1.1 | cut -d " " -f2', returnStdout: true).trim()
                     echo "responseStatus: "+responseStatus
                     if(responseStatus == "200"){
