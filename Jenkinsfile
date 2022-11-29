@@ -104,7 +104,8 @@ pipeline {
                     if(statusCode == "201"){
                         try {
                             sh 'git fetch --tags'
-                            lasttag = sh(returnStdout: true, script: 'git describe --abbrev=0 --tags')
+                            // lasttag = sh(returnStdout: true, script: 'git describe --abbrev=0 --tags')
+                            lasttag = sh(returnStdout: true, script: 'git describe --tags `git rev-list --tags --max-count=1`')
                         }catch(Exception e){
                             lasttag = "v0.0.0"
                         }
@@ -133,11 +134,16 @@ pipeline {
                         sh "git tag -a v"+lasttag+" -m 'v"+lasttag+"'"
                         sh "git config --global user.email 'danilovidalm@gmail.com'"
                         sh "git config --global user.name 'Jenkins'"
-                        sh ('''
-                            git config --local credential.helper "!f() { echo username=\\$GIT_AUTH_USR; echo password=\\$GIT_AUTH_PSW; }; f"
-                            git push --tags
-                        ''')
-                        slackSend color: "good", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Success"
+                        try{
+                            sh ('''
+                                git config --local credential.helper "!f() { echo username=\\$GIT_AUTH_USR; echo password=\\$GIT_AUTH_PSW; }; f"
+                                git push --tags
+                            ''')
+                            slackSend color: "good", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Success"
+                        }catch{
+                            echo "Error al hacer push de tag"
+                            slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
+                        }
                     }else{
                         slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
                     }
