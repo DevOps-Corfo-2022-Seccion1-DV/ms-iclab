@@ -76,26 +76,26 @@ pipeline {
         //         }
         //     }
         // }
-        // stage('pull request rama feature-*'){
-        //     when { branch 'feature-*' }
-        //     steps{
-        //         script {
-        //             jsonObj='{"title":"{title}","body":"{body}","head":"{branchname}","base":"{main}"}'
-        //             jsonObj=jsonObj.replace("{title}", "PR Generado por Jenkins")
-        //             jsonObj=jsonObj.replace("{body}", "Body prueba")
-        //             jsonObj=jsonObj.replace("{branchname}", env.BRANCH_NAME)
-        //             jsonObj=jsonObj.replace("{main}", "main")                                      
-        //             echo "JSON: $jsonObj"
-        //             statusCode=sh(script: "curl -o /dev/null -s -w \"%{http_code}\" -X POST -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GIT_AUTH_PSW\" https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls --data-raw '$jsonObj'", returnStdout: true)                         
-        //             echo "Resultado Pull request :  $statusCode" 
-        //             if(statusCode == "201"){
-        //                 slackSend color: "good", message: "Pull request creado correctamente"
-        //             }else{
-        //                 slackSend color: "danger", message: "Error al crear pull request"
-        //             }
-        //         }
-        //     }
-        // }
+        stage('pull request rama feature-*'){
+            when { branch 'feature-*' }
+            steps{
+                script {
+                    jsonObj='{"title":"{title}","body":"{body}","head":"{branchname}","base":"{main}"}'
+                    jsonObj=jsonObj.replace("{title}", "PR Generado por Jenkins")
+                    jsonObj=jsonObj.replace("{body}", "Body prueba")
+                    jsonObj=jsonObj.replace("{branchname}", env.BRANCH_NAME)
+                    jsonObj=jsonObj.replace("{main}", "main")                                      
+                    echo "JSON: $jsonObj"
+                    statusCode=sh(script: "curl -o /dev/null -s -w \"%{http_code}\" -X POST -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GIT_AUTH_PSW\" https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls --data-raw '$jsonObj'", returnStdout: true)                         
+                    echo "Resultado Pull request :  $statusCode" 
+                    if(statusCode == "201"){
+                        slackSend color: "good", message: "Pull request creado correctamente"
+                    }else{
+                        slackSend color: "danger", message: "Error al crear pull request"
+                    }
+                }
+            }
+        }
         // stage('Package'){
         //     when { anyOf {  branch 'main' } }
         //     steps {
