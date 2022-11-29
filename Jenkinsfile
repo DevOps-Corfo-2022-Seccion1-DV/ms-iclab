@@ -190,7 +190,7 @@ pipeline {
                 script {
                     echo env.BRANCH_NAME
                     echo BRANCH_NAME
-                    statusCode = sh(''' 
+                    sh(''' 
                     curl \
                         -X POST \
                         -H "Accept: application/vnd.github+json" \
@@ -199,7 +199,8 @@ pipeline {
                         -d '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":\"${BRANCH_NAME} \" ,"base":"main"}' | tail -1 > mergeResult.txt
                     ''')
                     // statusCode = sh(script: 'curl -o /dev/null -s -w "%{http_code}" -X POST -H "Accept: apllication/vnd.github+json" -H "Autorization: Bearer $GIT_AUTH_PSW" https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls -d {"title":"Titulo pull request","body":"Cuerpo pull request","head":"$BRANCH_NAME","base":"main"}', returnStdout: true)
-                    echo statusCode
+                    status = sh(script: 'cat mergeResult.txt | jq .status', returnStdout: true)
+                    echo "status: "+status
                 }
                                // script {
                     
