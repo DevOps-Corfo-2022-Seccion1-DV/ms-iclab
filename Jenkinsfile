@@ -185,6 +185,7 @@ pipeline {
             }
         }
         stage('Run Artifact Jar'){
+            when { branch 'main' }
             steps{
                 sh 'nohup java -jar ./DevOpsUsach2020-${lasttag}.jar&'
             }
@@ -195,6 +196,7 @@ pipeline {
             }
         }
         stage('sleep'){
+            when { branch 'main' }
             steps{
                 echo 'Sleeping...'
                 sleep time: 20, unit: 'SECONDS'
@@ -202,6 +204,7 @@ pipeline {
             }
         }
         stage('CURL Localhost:8081'){
+            when { branch 'main' }
             steps{
                 echo 'CURL...'
                 sh 'curl -s -o /dev/null/ -w %{http_code} http://localhost:8081/rest/mscovid/test?msg=testing > response.txt'
