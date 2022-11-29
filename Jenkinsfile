@@ -189,17 +189,17 @@ pipeline {
             steps{
                 script {
                     echo env.BRANCH_NAME
-                    echo BRANCH_NAME
-                    pruenaObjeto = '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":\$BRANCH_NAME ,"base":"main"}'
-                    echo pruenaObjeto
-                    // sh(''' 
-                    // curl \
-                    //     -X POST \
-                    //     -H "Accept: application/vnd.github+json" \
-                    //     -H "Authorization: Bearer $GIT_AUTH_PSW" \
-                    //     https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls \
-                    //     -d '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"feature" ,"base":"main"}'
-                    // ''')
+                    // echo BRANCH_NAME
+                    // pruenaObjeto = '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":\$BRANCH_NAME ,"base":"main"}'
+                    // echo pruenaObjeto
+                    sh(''' 
+                    curl \
+                        -X POST \
+                        -H "Accept: application/vnd.github+json" \
+                        -H "Authorization: Bearer $GIT_AUTH_PSW" \
+                        https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls \
+                        -d '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"\$BRANCH_NAME" ,"base":"main"}'
+                    ''')
                     // statusCode = sh(script: 'curl -o /dev/null -s -w "%{http_code}" -X POST -H "Accept: apllication/vnd.github+json" -H "Autorization: Bearer $GIT_AUTH_PSW" https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls -d {"title":"Titulo pull request","body":"Cuerpo pull request","head":"$BRANCH_NAME","base":"main"}', returnStdout: true)
                     // status = sh(script: 'cat mergeResult.txt | jq .status', returnStdout: true)
                     // echo "status: "+status
