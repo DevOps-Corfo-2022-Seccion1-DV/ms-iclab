@@ -1,4 +1,5 @@
 def pipelineType
+def lasttag
 
 pipeline {
     agent any
@@ -40,42 +41,62 @@ pipeline {
                 }
             }
         }
-        // stage("Build"){
-        //     when { anyOf { branch 'feature-*'; branch 'main' } }
-        //     steps {
-        //         sh './mvnw clean compile -e'
-        //     }
-        //     post{
-        //         failure {
-        //             slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
-        //         }
-        //     }
-        // }
-        // stage('Test') {
-        //     when { anyOf { branch 'feature-*'; branch 'main' } }
-        //     steps {
-        //         sh './mvnw test -e'
-        //     }
-        //     post{
-        //         failure {
-        //             slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
-        //         }
-        //     }
-        // }
-        // stage('SonarQube') {
-        //     when { anyOf { branch 'feature-*'; branch 'main' } }
-        //     steps {
-        //         // sh './mvnw sonar:sonar -e'
-        //         withSonarQubeEnv('sonar-public') {
-        //             sh './mvnw clean package sonar:sonar'
-        //         }
-        //     }
-        //     post{
-        //         failure {
-        //             slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
-        //         }
-        //     }
-        // }
+        stage('Validate Commit'){
+            when { branch 'feature-*' }
+            steps{
+                if(env.commitmsg.contains("major") || env.commitmsg.contains("minor") || env.commitmsg.contains("patch")){
+                    echo "Commit Mensaje Valido"
+                }else{
+                    echo "no contiene ninguna palabra"
+                    currentBuild.result = 'ABORTED'
+                    error("No se ha encontrado ninguna palabra clave para el incremento de version")
+                }
+            }
+            post{
+                success{
+                    echo "Mensaje commit correcto ${lasttag}"
+                }
+                failure{
+                    slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
+                }
+            }
+        }
+        stage("Build"){
+            when { anyOf { branch 'feature-*'; branch 'main' } }
+            steps {
+                sh './mvnw clean compile -e'
+            }
+            post{
+                failure {
+                    slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
+                }
+            }
+        }
+        stage('Test') {
+            when { anyOf { branch 'feature-*'; branch 'main' } }
+            steps {
+                sh './mvnw test -e'
+            }
+            post{
+                failure {
+                    slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
+                }
+            }
+        }
+        stage('SonarQube') {
+            when { anyOf { branch 'feature-*'; branch 'main' } }
+            steps {
+                // sh './mvnw sonar:sonar -e'
+                withSonarQubeEnv('sonar-public') {
+                    sh './mvnw clean package sonar:sonar'
+                }
+            }
+            post{
+                failure {
+                    slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
+                }
+            }
+        }
         stage('pull request rama feature-*'){
             when { branch 'feature-*' }
             steps{
@@ -89,6 +110,40 @@ pipeline {
                     statusCode=sh(script: "curl -o /dev/null -s -w \"%{http_code}\" -X POST -H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer $GIT_AUTH_PSW\" https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls --data-raw '$jsonObj'", returnStdout: true)                         
                     echo "Resultado Pull request :  $statusCode" 
                     if(statusCode == "201"){
+                        try {
+                            sh 'git fetch --tags'
+                            lasttag = sh(returnStdout: true, script: 'git describe --abbrev=0 --tags')
+                        }catch(Exception e){
+                            lasttag = "v0.0.0"
+                        }
+                        echo "Ultimo tag: $lasttag"
+                        echo "mensaje commit : "+env.commitmsg
+                        lasttag = lasttag.trim()
+                        echo "lasttag: "+lasttag
+                        lasttag = lasttag.substring(1)
+                        echo "lasttag: "+lasttag
+                        lasttag = lasttag.split("\\.")
+                        echo "lasttag: "+lasttag
+                        //ver si mensaje contiene una palabra
+                        if(env.commitmsg.contains("major")){
+                            lasttag = (lasttag[0].toInteger()+1)+".0.0"
+                        }else if(env.commitmsg.contains("minor")){
+                            lasttag = lasttag[0]+"."+(lasttag[1].toInteger()+1)+"."+lasttag[2]
+                        }else if(env.commitmsg.contains("patch")){
+                            lasttag = lasttag[0]+"."+lasttag[1]+"."+(lasttag[2].toInteger()+1)
+                        }else{
+                            echo "no contiene ninguna palabra"
+                            currentBuild.result = 'ABORTED'
+                            error("No se ha encontrado ninguna palabra clave para el incremento de version")
+                        }
+                        echo "lasttag: "+lasttag
+                        sh "git tag -a v"+lasttag+" -m 'v"+lasttag+"'"
+                        sh "git config --global user.email 'danilovidalm@gmail.com'"
+                        sh "git config --global user.name 'Jenkins'"
+                        sh ('''
+                            git config --local credential.helper "!f() { echo username=\\$GIT_AUTH_USR; echo password=\\$GIT_AUTH_PSW; }; f"
+                            git push --tags
+                        ''')
                         slackSend color: "good", message: "Pull request creado correctamente"
                     }else{
                         slackSend color: "danger", message: "Error al crear pull request"
