@@ -44,17 +44,20 @@ pipeline {
         stage('Validate Commit'){
             when { branch 'feature-*' }
             steps{
-                if(env.commitmsg.contains("major") || env.commitmsg.contains("minor") || env.commitmsg.contains("patch")){
-                    echo "Commit Mensaje Valido"
-                }else{
-                    echo "no contiene ninguna palabra"
-                    currentBuild.result = 'ABORTED'
-                    error("No se ha encontrado ninguna palabra clave para el incremento de version")
+                script{
+                    if(env.commitmsg.contains("major") || env.commitmsg.contains("minor") || env.commitmsg.contains("patch")){
+
+                        echo "Commit Mensaje Valido"
+                    }else{
+                        echo "no contiene ninguna palabra"
+                        currentBuild.result = 'ABORTED'
+                        error("No se ha encontrado ninguna palabra clave para el incremento de version")
+                    }
                 }
             }
             post{
                 success{
-                    echo "Mensaje commit correcto ${lasttag}"
+                    echo "Mensaje commit correcto"
                 }
                 failure{
                     slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
