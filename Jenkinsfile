@@ -182,7 +182,6 @@ pipeline {
         stage('Download Artifact From Nexus'){
             when { branch 'main' }
             steps{
-                // nexusArtifactDownloader nexusInstanceId: 'nexus01', nexusRepositoryId: 'devops-usach-nexus', nexusArtifact: [[artifactId: 'DevOpsUsach2020', groupId: 'com.devopsusach2020', packaging: 'jar', version: lasttag]]
                 sh "curl -X GET -u admin:1qazxsw2 https://nexus.danilovidalm.com/repository/devops-usach-nexus/com/devopsusach2020/DevOpsUsach2020/"+lasttag+"/DevOpsUsach2020-"+lasttag+".jar -O"
             }
             post{
@@ -215,13 +214,15 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh 'curl -s -o /dev/null/ -w %{http_code} http://localhost:8081/rest/mscovid/test?msg=testing > response.txt'
+                        // sh 'curl -s -o /dev/null/ -w %{http_code} http://localhost:8081/rest/mscovid/test?msg=testing > response.txt'
+                        responseStatus = sh (script: "curl -o /dev/null -s -w \"%{http_code}\" http://localhost:8081/rest/mscovid/test?msg=testing", returnStdout: true)
                     }catch(Exception e){
                         echo "Error al hacer curl"
+                        echo e
                         slackSend color: "danger", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Fail"
                     }
-                    responseStatus = sh(script: 'cat response.txt | grep HTTP/1.1 | cut -d " " -f2', returnStdout: true).trim()
-                    echo "responseStatus: "+responseStatus
+                    // responseStatus = sh(script: 'cat response.txt | grep HTTP/1.1 | cut -d " " -f2', returnStdout: true).trim()
+                    // echo "responseStatus: "+responseStatus
                     if(responseStatus == "200"){
                         echo "Success"
                         slackSend color: "good", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Success"
