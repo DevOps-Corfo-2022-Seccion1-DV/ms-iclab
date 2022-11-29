@@ -188,8 +188,8 @@ pipeline {
             when { anyOf { branch 'feature-*' } }
             steps{
                 script {
-                    sh (script 'echo env.BRANCH_NAME')
-                    // echo BRANCH_NAME
+                    echo env.BRANCH_NAME
+                    echo BRANCH_NAME
                     // statusCode = sh(script: 'curl -o /dev/null -s -w "%{http_code}" -X POST -H "Accept: apllication/vnd.github+json" -H "Autorization: Bearer $GIT_AUTH_PSW" https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls -d {"title":"Titulo pull request","body":"Cuerpo pull request","head":"","base":"main"}', returnStdout: true)
                 }
                                // script {
