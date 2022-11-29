@@ -19,8 +19,6 @@ pipeline {
         jenkinsurl = sh(script: 'echo "${BUILD_URL}"' , returnStdout: true).trim()
 
     }
-    //[Grupo2][Pipeline IC/CD][Rama: develop][Stage: build][Resultado: Éxito/Success].
-    //[Grupo2][Pipeline IC/CD][Rama: re-v1-0-0][Stage: test][Resultado: Error/Fail].
     stages {
         stage('Checkout') {
             steps {
@@ -140,13 +138,15 @@ pipeline {
                             git config --local credential.helper "!f() { echo username=\\$GIT_AUTH_USR; echo password=\\$GIT_AUTH_PSW; }; f"
                             git push --tags
                         ''')
-                        slackSend color: "good", message: "Pull request creado correctamente"
+                        slackSend color: "good", message: "Grupo 3 - " + pipelineType + " - Rama : " + env.BRANCH_NAME + " - Stage : " + env.STAGE_NAME + " - Success"
                     }else{
                         slackSend color: "danger", message: "Error al crear pull request"
                     }
                 }
             }
         }
+    //[Grupo2][Pipeline IC/CD][Rama: develop][Stage: build][Resultado: Éxito/Success].
+    //[Grupo2][Pipeline IC/CD][Rama: re-v1-0-0][Stage: test][Resultado: Error/Fail].
         // stage('Package'){
         //     when { anyOf {  branch 'main' } }
         //     steps {
