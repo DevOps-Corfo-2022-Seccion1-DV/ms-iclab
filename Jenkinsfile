@@ -194,7 +194,7 @@ pipeline {
                         -H "Accept: application/vnd.github+json" \
                         -H "Authorization: Bearer $GIT_AUTH_PSW" \
                         https://api.github.com/repos/DevOps-Corfo-2022-Seccion1-DV/ms-iclab/pulls \
-                        -d '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"\$BRANCH_NAME" ,"base":"main"}''
+                        -d "{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"\$BRANCH_NAME" ,"base":"main"}"'
 
                     export rama = env.BRANCH_NAME
                     echo rama
