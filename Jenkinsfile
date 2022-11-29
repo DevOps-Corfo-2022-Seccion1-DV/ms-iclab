@@ -214,8 +214,8 @@ pipeline {
             steps{
                 script{
                     try{
-                        // sh 'curl -s -o /dev/null/ -w %{http_code} http://localhost:8081/rest/mscovid/test?msg=testing > response.txt'
-                        responseStatus = sh (script: "curl -o /dev/null -s -w \"%{http_code}\" http://localhost:8081/rest/mscovid/test?msg=testing", returnStdout: true)
+                        // responseStatus = sh (script: "curl -o /dev/null -s -w \"%{http_code}\" http://localhost:8081/rest/mscovid/test?msg=testing", returnStdout: true)
+                        responseStatus = sh (script: "curl -o /dev/null -s -w \"%{http_code}\" http://localhost:8080/rest/mscovid/test?msg=testing", returnStdout: true)
                     }catch(Exception e){
                         echo "Error al hacer curl"
                         echo e
