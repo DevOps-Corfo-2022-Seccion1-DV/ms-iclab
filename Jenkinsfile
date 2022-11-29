@@ -190,8 +190,8 @@ pipeline {
                 script {
                     //cambiar feature-prueba por valor variable 
                     jsonObj='{"title":"{title}","body":"{body}","head":"{branchname}","base":"{main}"}'
-                    //trim
-                    env.result = env.result.trim()
+                    //eliminar salto de linea de variable
+                    env.result = env.result.replace("\n", "")
 
                     jsonObj=jsonObj.replace("{title}", env.result)
                     jsonObj=jsonObj.replace("{body}", env.result)
